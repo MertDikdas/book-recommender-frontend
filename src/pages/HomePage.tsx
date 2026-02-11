@@ -35,15 +35,21 @@ export function HomePage({ username, onLogout }: HomePageProps) {
   }, [username]);
 
   const handleSearch = async () => {
-    if (!query.trim()) return;
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setMode("recommendations");
+      // istersen burada tekrar öneri çekebilirsin
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       setMode("search");
-      const data = await searchBooks(query.trim());
+      const data = await searchBooks(trimmed);
       setBooks(data);
     } catch (e) {
-      console.error(e);
+      console.error("SEARCH ERROR:", e);
       setError("Arama sırasında bir hata oldu.");
     } finally {
       setLoading(false);
@@ -71,8 +77,13 @@ export function HomePage({ username, onLogout }: HomePageProps) {
           </button>
         </header>
 
-        <SearchBar value={query} onChange={setQuery} onSubmit={handleSearch} />
+      <SearchBar
+          value={query}
+          onChange={setQuery}
+          onSubmit={handleSearch}
+        />
 
+        {/* Başlık: öneri mi arama mı? */}
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold">
             {mode === "recommendations"
@@ -81,13 +92,15 @@ export function HomePage({ username, onLogout }: HomePageProps) {
           </h2>
         </div>
 
+        {/* Loading / Error / Sonuçlar */}
         {loading && <p className="text-sm text-gray-500">Yükleniyor...</p>}
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <div className="mt-3 grid gap-3">
           {books.map((b) => (
-            <BookCard key={b.work_key} book={b} />
+            <BookCard key={b.id ?? b.title} book={b} />
           ))}
+
           {!loading && books.length === 0 && !error && (
             <p className="text-sm text-gray-500">
               Gösterilecek kitap bulunamadı.
