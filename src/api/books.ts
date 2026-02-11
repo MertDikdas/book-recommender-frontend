@@ -15,6 +15,11 @@ export async function searchBooks(entry: string): Promise<Book[]> {
   return res.data;
 }
 
+export async function getUserBooks(username: string): Promise<Book[]> {
+  const res = await api.get(`/users/${username}/books`);
+  return res.data;
+}
+
 // all books
 export async function getAllBooks(): Promise<Book[]> {
   const res = await api.get(`/books/all`);

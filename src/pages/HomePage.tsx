@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { BookCard } from "../components/BookCard";
-import { getRecommendationsForUser, searchBooks } from "../api/books";
+import { getRecommendationsForUser, searchBooks, getUserBooks} from "../api/books";
 import type { Book } from "../types/book";
 
 interface HomePageProps {
@@ -74,6 +74,23 @@ export function HomePage({ username, onLogout }: HomePageProps) {
             className="text-xs px-3 py-1 rounded border border-gray-300 hover:bg-gray-200"
           >
             Kullanıcı değiştir
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                const data = await getUserBooks(username);
+                setBooks(data);
+                setMode("search");
+              } catch (e) {
+                console.error(e);
+                setError("Kitaplar yüklenirken bir hata oldu.");
+              }
+            }}
+            className="text-sm px-3 py-1 rounded-lg border border-gray-300 
+hover:bg-gray-100 transition duration-200
+"
+          >
+            Kitaplarım
           </button>
         </header>
 
