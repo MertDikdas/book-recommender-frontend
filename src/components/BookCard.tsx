@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Book } from "../types/book";
-import { rateBook } from "../api/books";
+import { rateBook, getBookRating, getUserBooks } from "../api/books";
 
 interface Props {
   book: Book;
@@ -12,15 +12,33 @@ export function BookCard({ book, username, onRatingSubmitted }: Props) {
   const [rating, setRating] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // When user clicks a star, we optimistically update the UI and then send the rating to the server.
+  useEffect(() => {
+    const loadRating = async () => {
+      try {
+        setIsLoading(true);
+        const userBooks = await getUserBooks(username);
+        if(userBooks.some(b => b.id === book.id)) {
+          const userRating = await getBookRating(username, book.id);
+          if (userRating) {
+            setRating(userRating);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading rating:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadRating();
+  }, [username, book.id]);
+
   const handleRateBook = async (rate: number) => {
     setRating(rate);
     
     if (username) {
       try {
-        // Optimistically set submitting state to disable further clicks until we get a response
         setIsSubmitting(true);
         await rateBook(username, book.id, rate);
         setSubmitted(true);
@@ -65,7 +83,6 @@ export function BookCard({ book, username, onRatingSubmitted }: Props) {
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
-                // When a star is clicked, we call handleRateBook with the corresponding rating value
                 onClick={() => handleRateBook(star)}
                 disabled={isSubmitting || isLoading}
                 className={`text-xl transition-transform ${
