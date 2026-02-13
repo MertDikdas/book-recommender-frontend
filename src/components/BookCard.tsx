@@ -18,10 +18,13 @@ export function BookCard({ book, username, onRatingSubmitted }: Props) {
     const loadRating = async () => {
       try {
         setIsLoading(true);
+        // Check if user has rated this book before by fetching user's books and their ratings
         const userBooks = await getUserBooks(username);
+        // If the book is in user's books, fetch its rating
         if(userBooks.some(b => b.id === book.id)) {
           const userRating = await getBookRating(username, book.id);
           if (userRating) {
+            // If user has rated before, set the rating state to that value
             setRating(userRating);
           }
         }
@@ -34,13 +37,23 @@ export function BookCard({ book, username, onRatingSubmitted }: Props) {
     loadRating();
   }, [username, book.id]);
 
+  // Handle rating submission
   const handleRateBook = async (rate: number) => {
     setRating(rate);
-    
+    // Only submit if user is logged in
     if (username) {
       try {
         setIsSubmitting(true);
+        if (rating === rate) {
+          // If user clicks the same rating again, it means they want to remove their rating
+          await rateBook(username, book.id, 0); // Assuming 0 means "no rating"
+          setRating(null);
+          onRatingSubmitted?.();
+          return;
+        }
+        // Call API to save the rating for this book and user
         await rateBook(username, book.id, rate);
+        // Show a temporary "Saved" message after successful submission
         setSubmitted(true);
         onRatingSubmitted?.();
         // Reset after 2 seconds
