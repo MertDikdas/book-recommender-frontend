@@ -25,3 +25,23 @@ export async function getAllBooks(): Promise<Book[]> {
   const res = await api.get(`/books/all`);
   return res.data;
 }
+
+// rate book
+export async function rateBook(username: string, bookId: number, rating: number): Promise<void> {
+  await api.post(`/ratings`, {
+    username,
+    book_id: bookId,
+    rating,
+  });
+}
+
+// get book rate
+export async function getBookRating(username: string, bookId: number): Promise<number | null> {
+  try {
+    const res = await api.get(`/ratings/user/${username}/book/${bookId}`);
+    return res.data.rating;
+  } catch (error) {
+    console.error("Error fetching book rating:", error);
+    return null;
+  }
+}

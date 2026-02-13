@@ -8,7 +8,9 @@ interface Props {
 
 export function SearchBar({ value, onChange, onSubmit }: Props) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    onSubmit();
+    if (e.key === "Enter") {
+      onSubmit();
+    }
   };
 
   return (

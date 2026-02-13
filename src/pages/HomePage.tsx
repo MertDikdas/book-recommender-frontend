@@ -134,7 +134,7 @@ hover:bg-gray-100 transition duration-200
 
         <div className="mt-3 grid gap-3">
           {books.map((b) => (
-            <BookCard key={b.id ?? b.title} book={b} />
+            <BookCard key={b.id ?? b.title} book={b} username={username} />
           ))}
 
           {!loading && books.length === 0 && !error && (
