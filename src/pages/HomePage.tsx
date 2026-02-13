@@ -27,7 +27,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         setBooks(data);
       } catch (e) {
         console.error(e);
-        setError("Öneriler yüklenirken bir hata oldu.");
+        setError("The recommendations could not be loaded.");
       } finally {
         setLoading(false);
       }
@@ -38,7 +38,6 @@ export function HomePage({ username, onLogout }: HomePageProps) {
     const trimmed = query.trim();
     if (!trimmed) {
       setMode("recommendations");
-      // istersen burada tekrar öneri çekebilirsin
       return;
     }
 
@@ -50,7 +49,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
       setBooks(data);
     } catch (e) {
       console.error("SEARCH ERROR:", e);
-      setError("Arama sırasında bir hata oldu.");
+      setError("An error occurred while searching for books.");
     } finally {
       setLoading(false);
     }
@@ -63,17 +62,17 @@ export function HomePage({ username, onLogout }: HomePageProps) {
           <div>
             <h1 className="text-2xl font-bold mb-1">Book Recommender</h1>
             <p className="text-sm text-gray-600">
-              Senin zevkine göre kitap öneren küçük asistanın 📚
+              An Assitant For Your Book Taste📚
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              Giriş yapılan kullanıcı: <span className="font-semibold">{username}</span>
+              Current User : <span className="font-semibold">{username}</span>
             </p>
           </div>
           <button
             onClick={onLogout}
             className="text-xs px-3 py-1 rounded border border-gray-300 hover:bg-gray-200"
           >
-            Kullanıcı değiştir
+            Change User
           </button>
           <button
             onClick={async () => {
@@ -83,14 +82,34 @@ export function HomePage({ username, onLogout }: HomePageProps) {
                 setMode("search");
               } catch (e) {
                 console.error(e);
-                setError("Kitaplar yüklenirken bir hata oldu.");
+                setError("The user's books could not be loaded.");
               }
             }}
             className="text-sm px-3 py-1 rounded-lg border border-gray-300 
 hover:bg-gray-100 transition duration-200
 "
           >
-            Kitaplarım
+            My Books
+          </button>
+                    <button
+            onClick={async () => {
+              try {
+                setLoading(true);
+                setError(null);
+                const data = await getRecommendationsForUser(username);
+                setBooks(data);
+              } catch (e) {
+                console.error(e);
+                setError("The recommendations could not be loaded.");
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="text-sm px-3 py-1 rounded-lg border border-gray-300 
+hover:bg-gray-100 transition duration-200
+"
+          >
+            Recommendations For Me
           </button>
         </header>
 
@@ -120,7 +139,7 @@ hover:bg-gray-100 transition duration-200
 
           {!loading && books.length === 0 && !error && (
             <p className="text-sm text-gray-500">
-              Gösterilecek kitap bulunamadı.
+              No books found for the given query.
             </p>
           )}
         </div>
