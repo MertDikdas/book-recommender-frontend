@@ -45,3 +45,8 @@ export async function getBookRating(username: string, bookId: number): Promise<n
     return null;
   }
 }
+
+// delete user book
+export async function deleteUserBook(username: string, bookId: number): Promise<void> {
+  await api.delete(`/ratings/${username}/books/${bookId}`);
+}

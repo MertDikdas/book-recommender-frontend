@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import type { Book } from "../types/book";
-import { rateBook, getBookRating, getUserBooks } from "../api/books";
+import { rateBook, getBookRating, getUserBooks, deleteUserBook } from "../api/books";
 
 interface Props {
   book: Book;
   username: string;
   onRatingSubmitted?: () => void;
+  onBookRemoved?: (bookId: number) => void;
 }
 
-export function BookCard({ book, username, onRatingSubmitted }: Props) {
+export function BookCard({ book, username, onRatingSubmitted, onBookRemoved }: Props) {
   const [rating, setRating] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -68,8 +69,28 @@ export function BookCard({ book, username, onRatingSubmitted }: Props) {
     }
   };
 
+  const handleDeleteBook = async () => {
+    try {
+      setIsSubmitting(true);
+      await deleteUserBook(username, book.id); // Assuming this also removes the book from user's list
+      setRating(null);
+      onBookRemoved?.(book.id); // Notify parent to remove this book from the UI
+    } catch (error) {
+      console.error("Error deleting book:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };  
+
   return (
-    <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white">
+    <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
+      <button
+        onClick={() => handleDeleteBook()}
+        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
+        title="Remove from list"
+      >
+        ✕
+      </button>
       {book.cover_url && (
         <img
           src={book.cover_url}

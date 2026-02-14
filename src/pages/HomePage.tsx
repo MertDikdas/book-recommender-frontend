@@ -55,6 +55,10 @@ export function HomePage({ username, onLogout }: HomePageProps) {
     }
   };
 
+  const handleBookRemoved = (bookId: number) => {
+    setBooks((prevBooks) => prevBooks.filter((b) => b.id !== bookId));
+  };
+
   return (
     <div className="min-h-screen bg-slate-100">
       <div className="max-w-4xl mx-auto p-4">
@@ -134,7 +138,7 @@ hover:bg-gray-100 transition duration-200
 
         <div className="mt-3 grid gap-3">
           {books.map((b) => (
-            <BookCard key={b.id ?? b.title} book={b} username={username} />
+            <BookCard key={b.id ?? b.title} book={b} username={username} onBookRemoved={handleBookRemoved} />
           ))}
 
           {!loading && books.length === 0 && !error && (
