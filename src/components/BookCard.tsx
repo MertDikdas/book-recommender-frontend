@@ -15,6 +15,7 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved }: P
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Load user's existing rating for this book when component mounts or when username/book changes
   useEffect(() => {
     const loadRating = async () => {
       try {
@@ -69,6 +70,7 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved }: P
     }
   };
 
+  // Handle book deletion from user's list
   const handleDeleteBook = async () => {
     try {
       setIsSubmitting(true);
@@ -84,6 +86,13 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved }: P
 
   return (
     <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
+      <button
+        onClick={() => handleRateBook(0)}
+        className="absolute top-2 right-15 text-gray-400 hover:text-gray-600 transition-colors"
+        title="Add to my books"
+      >
+        +
+      </button>
       <button
         onClick={() => handleDeleteBook()}
         className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
