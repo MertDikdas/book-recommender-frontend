@@ -150,7 +150,7 @@ hover:bg-gray-100 transition duration-200
         </div>
 
         {/* Loading / Error / Sonuçlar */}
-        {loading && <p className="text-sm text-gray-500">Yükleniyor...</p>}
+        {loading && <p className="text-sm text-gray-500">Loading...</p>}
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <div className="mt-3 grid gap-3">
