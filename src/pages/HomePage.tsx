@@ -14,7 +14,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
   const [query, setQuery] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"recommendations" | "search">(
+  const [mode, setMode] = useState<"recommendations" | "search" | "my-books">(
     "recommendations"
   );
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +100,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
               try {
                 const data = await getUserBooks(username);
                 setBooks(data);
-                setMode("search");
+                setMode("my-books");
               } catch (e) {
                 console.error(e);
                 setError("The user's books could not be loaded.");
@@ -112,11 +112,12 @@ hover:bg-gray-100 transition duration-200
           >
             My Books
           </button>
-                    <button
+          <button
             onClick={async () => {
               try {
                 setLoading(true);
                 setError(null);
+                setMode("recommendations");
                 const data = await getRecommendationsForUser(username);
                 setBooks(data);
               } catch (e) {
@@ -144,8 +145,10 @@ hover:bg-gray-100 transition duration-200
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold">
             {mode === "recommendations"
-              ? "Senin için önerilen kitaplar"
-              : `"${query}" için arama sonuçları`}
+              ? "Recommendations for you"
+              : mode === "my-books"
+              ? "My Books"
+              : `"${query}" search results`}
           </h2>
         </div>
 
