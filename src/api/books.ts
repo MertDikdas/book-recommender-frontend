@@ -50,3 +50,9 @@ export async function getBookRating(username: string, bookId: number): Promise<n
 export async function deleteUserBook(username: string, bookId: number): Promise<void> {
   await api.delete(`/ratings/${username}/books/${bookId}`);
 }
+
+//Recommendations
+export async function getRecommendationsForUserByGenre(username: string, genre: string): Promise<Book[]> {
+  const res = await api.get(`/recommendations/${username}/${genre}`);
+  return res.data;
+}
