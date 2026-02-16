@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { BookCard } from "../components/BookCard";
-import { getRecommendationsForUser, searchBooks, getUserBooks} from "../api/books";
+import { getRecommendationsForUser, searchBooks, getUserBooks, getRecommendationsForUserByGenre} from "../api/books";
 import type { Book } from "../types/book";
-import { deleteUser } from "../api/users";
+import { deleteUser, getUserGenres } from "../api/users";
 
 interface HomePageProps {
   username: string;
@@ -17,6 +17,8 @@ export function HomePage({ username, onLogout }: HomePageProps) {
   const [mode, setMode] = useState<"recommendations" | "search" | "my-books">(
     "recommendations"
   );
+  const [userGenres, setUserGenres] = useState<string[]>([]);
+  const [showGenreFilter, setShowGenreFilter] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
       setMode("recommendations");
       return;
     }
-
+    setShowGenreFilter(false);
     try {
       setLoading(true);
       setError(null);
@@ -102,7 +104,6 @@ export function HomePage({ username, onLogout }: HomePageProps) {
           onChange={setQuery}
           onSubmit={handleSearch}
         />
-
         {/* Başlık: öneri mi arama mı? */}
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold">
@@ -119,6 +120,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         {error && <p className="text-sm text-red-500">{error}</p>}
         <button
           onClick={async () => {
+            setShowGenreFilter(false);
             try {
               const data = await getUserBooks(username);
               setBooks(data);
@@ -155,6 +157,51 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         >
           Recommendations For Me
         </button>
+        {mode === "recommendations" && <button 
+          onClick={async () => {
+          try {
+                const genres = await getUserGenres(username);
+                setUserGenres(genres); 
+                if (!showGenreFilter) {
+                  setShowGenreFilter(true);
+                } else {
+                  setShowGenreFilter(false);
+                }
+              } catch (e) {
+                console.error(e);
+                setError("The user's genres could not be loaded.");
+              }
+          }}
+          className="text-sm px-3 py-1 rounded-lg border border-gray-300 
+  hover:bg-gray-100 transition duration-200
+  "
+        >
+          Filter
+        </button>}
+        {showGenreFilter && (
+          <div className="flex gap-2 mt-3 flex-wrap">
+            {userGenres.map((genre) => (
+              <button
+                key={genre}
+                onClick={() => {
+                  setLoading(true);
+                  getRecommendationsForUserByGenre(username, genre)
+                    .then(setBooks)
+                    .catch((e) => {
+                      console.error(e);
+                      setError("Failed to load recommendations for the selected genre.");
+                    })
+                    .finally(() => setLoading(false));
+                  setShowGenreFilter(false); // filtre seçilince kapansın
+                }}
+                className="text-xs px-3 py-1 rounded-full border 
+                border-blue-400 text-blue-600 hover:bg-blue-100 transition"
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="mt-3 grid gap-3">
           {books.map((b) => (
             <BookCard key={b.id ?? b.title} book={b} username={username} onBookRemoved={handleBookRemoved} />

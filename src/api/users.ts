@@ -15,3 +15,8 @@ export async function createUser(username: string): Promise<User> {
     const res = await api.post(`/users`, { username });
     return res.data;
 }
+
+export async function getUserGenres(username: string): Promise<string[]> {
+    const res = await api.get(`/users/${username}/genres`);
+    return res.data;
+}
