@@ -73,7 +73,19 @@ export function HomePage({ username, onLogout }: HomePageProps) {
   return (
     <div className="min-h-screen bg-slate-100">
       <div className="max-w-4xl mx-auto p-4">
-        <header className="mb-6 flex items-center justify-between gap-4">
+        <button
+          onClick={onLogout}
+          className="text-xs px-1 py-1 rounded border border-gray-300 hover:bg-gray-200"
+        >
+          Change User
+        </button>
+        <button
+          onClick={handleUserDelete}
+          className="text-xs px-5 py-1 rounded border border-gray-300 hover:bg-gray-200"
+        >
+          Delete Account
+        </button>
+        <header className="mb-6 flex items-center justify-between gap-2">
           <div>
             <h1 className="text-2xl font-bold mb-1">Book Recommender</h1>
             <p className="text-sm text-gray-600">
@@ -83,59 +95,9 @@ export function HomePage({ username, onLogout }: HomePageProps) {
               Current User : <span className="font-semibold">{username}</span>
             </p>
           </div>
-          <button
-            onClick={onLogout}
-            className="text-xs px-3 py-1 rounded border border-gray-300 hover:bg-gray-200"
-          >
-            Change User
-          </button>
-          <button
-            onClick={handleUserDelete}
-            className="text-xs px-5 py-1 rounded border border-gray-300 hover:bg-gray-200"
-          >
-            Delete Account
-          </button>
-          <button
-            onClick={async () => {
-              try {
-                const data = await getUserBooks(username);
-                setBooks(data);
-                setMode("my-books");
-              } catch (e) {
-                console.error(e);
-                setError("The user's books could not be loaded.");
-              }
-            }}
-            className="text-sm px-3 py-1 rounded-lg border border-gray-300 
-hover:bg-gray-100 transition duration-200
-"
-          >
-            My Books
-          </button>
-          <button
-            onClick={async () => {
-              try {
-                setLoading(true);
-                setError(null);
-                setMode("recommendations");
-                const data = await getRecommendationsForUser(username);
-                setBooks(data);
-              } catch (e) {
-                console.error(e);
-                setError("The recommendations could not be loaded.");
-              } finally {
-                setLoading(false);
-              }
-            }}
-            className="text-sm px-3 py-1 rounded-lg border border-gray-300 
-hover:bg-gray-100 transition duration-200
-"
-          >
-            Recommendations For Me
-          </button>
+          
         </header>
-
-      <SearchBar
+        <SearchBar
           value={query}
           onChange={setQuery}
           onSubmit={handleSearch}
@@ -155,7 +117,44 @@ hover:bg-gray-100 transition duration-200
         {/* Loading / Error / Sonuçlar */}
         {loading && <p className="text-sm text-gray-500">Loading...</p>}
         {error && <p className="text-sm text-red-500">{error}</p>}
-
+        <button
+          onClick={async () => {
+            try {
+              const data = await getUserBooks(username);
+              setBooks(data);
+              setMode("my-books");
+            } catch (e) {
+              console.error(e);
+              setError("The user's books could not be loaded.");
+            }
+          }}
+          className="text-sm px-3 py-1 rounded-lg border border-gray-300 
+  hover:bg-gray-100 transition duration-200
+  "
+        >
+          My Books
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              setLoading(true);
+              setError(null);
+              setMode("recommendations");
+              const data = await getRecommendationsForUser(username);
+              setBooks(data);
+            } catch (e) {
+              console.error(e);
+              setError("The recommendations could not be loaded.");
+            } finally {
+              setLoading(false);
+            }
+          }}
+          className="text-sm px-3 py-1 rounded-lg border border-gray-300 
+  hover:bg-gray-100 transition duration-200
+  "
+        >
+          Recommendations For Me
+        </button>
         <div className="mt-3 grid gap-3">
           {books.map((b) => (
             <BookCard key={b.id ?? b.title} book={b} username={username} onBookRemoved={handleBookRemoved} />
