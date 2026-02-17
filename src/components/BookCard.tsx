@@ -7,9 +7,10 @@ interface Props {
   username: string;
   onRatingSubmitted?: () => void;
   onBookRemoved?: (bookId: number) => void;
+  bookCardType?: "other-book" | "my-book";
 }
 
-export function BookCard({ book, username, onRatingSubmitted, onBookRemoved }: Props) {
+export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, bookCardType }: Props) {
   const [rating, setRating] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -86,20 +87,24 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved }: P
 
   return (
     <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
-      <button
-        onClick={() => handleRateBook(0)}
-        className="absolute top-2 right-15 text-gray-400 hover:text-gray-600 transition-colors"
+      {bookCardType === "other-book" && <button
+        onClick={() => {handleRateBook(0);
+          if (bookCardType === "other-book") {
+            onBookRemoved?.(book.id);
+          }
+        }}
+        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
         title="Add to my books"
       >
         +
-      </button>
-      <button
+      </button>}
+      {bookCardType === "my-book" && <button
         onClick={() => handleDeleteBook()}
-        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
+        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors text-xl"
         title="Remove from list"
       >
-        ✕
-      </button>
+        x
+      </button>}
       {book.cover_url && (
         <img
           src={book.cover_url}
@@ -126,7 +131,12 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved }: P
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
-                onClick={() => handleRateBook(star)}
+                onClick={() => {handleRateBook(star);
+                  if (bookCardType === "other-book") {
+                    onBookRemoved?.(book.id);
+                  }
+                  
+                }}
                 disabled={isSubmitting || isLoading}
                 className={`text-xl transition-transform ${
                   rating && star <= rating

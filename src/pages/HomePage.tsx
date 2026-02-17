@@ -272,7 +272,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         )}
         <div className="mt-3 grid gap-3">
           {books.map((b) => (
-            <BookCard key={b.id ?? b.title} book={b} username={username} onBookRemoved={handleBookRemoved} />
+            <BookCard key={b.id ?? b.title} book={b} username={username} onBookRemoved={handleBookRemoved} bookCardType={mode === "my-books" ? "my-book" : "other-book"} />
           ))}
 
           {!loading && books.length === 0 && !error && (
