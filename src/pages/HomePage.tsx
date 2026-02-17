@@ -24,12 +24,14 @@ export function HomePage({ username, onLogout }: HomePageProps) {
   const [showGenreFilter, setShowGenreFilter] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentGenre, setCurrentGenre] = useState<string | null>(null);
-
+  const [userBooks, setUserBooks] = useState<Book[]>([]);
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         setError(null);
+        const myBooks = await getUserBooks(username);
+        setUserBooks(myBooks);
         if(currentGenre) {
           const data = await getRecommendationsForUserByGenre(username, currentGenre, parseInt(currentPage));
           setBooks(data);
@@ -272,7 +274,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         )}
         <div className="mt-3 grid gap-3">
           {books.map((b) => (
-            <BookCard key={b.id ?? b.title} book={b} username={username} onBookRemoved={handleBookRemoved} bookCardType={mode === "my-books" ? "my-book" : "other-book"} />
+            <BookCard key={b.id ?? b.title} book={b} username={username} onBookRemoved={handleBookRemoved} bookCardType={mode === "my-books" ? "my-book" : "other-book"} isInMyBooks={userBooks}  />
           ))}
 
           {!loading && books.length === 0 && !error && (

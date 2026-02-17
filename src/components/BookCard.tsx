@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Book } from "../types/book";
-import { rateBook, getBookRating, getUserBooks, deleteUserBook } from "../api/books";
+import { rateBook, getBookRating, deleteUserBook } from "../api/books";
 
 interface Props {
   book: Book;
@@ -8,23 +8,25 @@ interface Props {
   onRatingSubmitted?: () => void;
   onBookRemoved?: (bookId: number) => void;
   bookCardType?: "other-book" | "my-book";
+  isInMyBooks: Book[];
 }
 
-export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, bookCardType }: Props) {
+export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, bookCardType , isInMyBooks}: Props) {
   const [rating, setRating] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const bookCoverUrl = book.img_cover_url ?? "/placeholder-cover.png";
   // Load user's existing rating for this book when component mounts or when username/book changes
   useEffect(() => {
     const loadRating = async () => {
+      console.log("BOOK OBJECT:", bookCoverUrl);
       try {
+        console.log(book)
         setIsLoading(true);
         // Check if user has rated this book before by fetching user's books and their ratings
-        const userBooks = await getUserBooks(username);
         // If the book is in user's books, fetch its rating
-        if(userBooks.some(b => b.id === book.id)) {
+        if(isInMyBooks.some(b => b.id === book.id)) {
           const userRating = await getBookRating(username, book.id);
           if (userRating) {
             // If user has rated before, set the rating state to that value
@@ -87,6 +89,12 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
 
   return (
     <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
+    <img
+      src={bookCoverUrl || "/placeholder-cover.png"}
+      alt={book.title}
+      onError={(e) => (e.currentTarget.src = "/placeholder-cover.png")}
+      className="w-24 h-36 object-cover rounded"
+    />
       {bookCardType === "other-book" && <button
         onClick={() => {handleRateBook(0);
           if (bookCardType === "other-book") {
@@ -105,13 +113,6 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
       >
         x
       </button>}
-      {book.cover_url && (
-        <img
-          src={book.cover_url}
-          alt={book.title}
-          className="w-16 h-24 object-cover rounded"
-        />
-      )}
       <div className="flex-1">
         <h3 className="font-semibold text-sm">{book.title}</h3>
         <p className="text-xs text-gray-600">{book.author}</p>
