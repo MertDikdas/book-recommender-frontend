@@ -2,8 +2,10 @@ import { api } from "./client";
 import type { Book } from "../types/book";
 
 //Recommendations
-export async function getRecommendationsForUser(username: string): Promise<Book[]> {
-  const res = await api.get(`/recommendations/${username}`);
+export async function getRecommendationsForUser(username: string, page: number = 1): Promise<Book[]> {
+  const res = await api.get(`/recommendations/${username}`, {
+    params: { page_number: page },
+  });
   return res.data;
 }
 
@@ -52,7 +54,9 @@ export async function deleteUserBook(username: string, bookId: number): Promise<
 }
 
 //Recommendations
-export async function getRecommendationsForUserByGenre(username: string, genre: string): Promise<Book[]> {
-  const res = await api.get(`/recommendations/${username}/${genre}`);
+export async function getRecommendationsForUserByGenre(username: string, genre: string, page: number = 1): Promise<Book[]> {
+  const res = await api.get(`/recommendations/${username}/${genre}`, {
+    params: { page_number: page },
+  });
   return res.data;
 }

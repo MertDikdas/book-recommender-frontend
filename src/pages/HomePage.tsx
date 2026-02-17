@@ -4,6 +4,7 @@ import { BookCard } from "../components/BookCard";
 import { getRecommendationsForUser, searchBooks, getUserBooks, getRecommendationsForUserByGenre} from "../api/books";
 import type { Book } from "../types/book";
 import { deleteUser, getUserGenres } from "../api/users";
+import { PageChanger } from "../components/PageChanger";
 
 interface HomePageProps {
   username: string;
@@ -12,6 +13,8 @@ interface HomePageProps {
 
 export function HomePage({ username, onLogout }: HomePageProps) {
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState("1");
+  const [currentPage, setCurrentPage] = useState<string | "1">("1");
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"recommendations" | "search" | "my-books">(
@@ -20,14 +23,23 @@ export function HomePage({ username, onLogout }: HomePageProps) {
   const [userGenres, setUserGenres] = useState<string[]>([]);
   const [showGenreFilter, setShowGenreFilter] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentGenre, setCurrentGenre] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getRecommendationsForUser(username);
-        setBooks(data);
+        if(currentGenre) {
+          const data = await getRecommendationsForUserByGenre(username, currentGenre, parseInt(currentPage));
+          setBooks(data);
+        }
+        else {
+          const data = await getRecommendationsForUser(username, parseInt(currentPage));
+          setBooks(data);
+        }
+
+
       } catch (e) {
         console.error(e);
         setError("The recommendations could not be loaded.");
@@ -35,7 +47,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         setLoading(false);
       }
     })();
-  }, [username]);
+  }, [username, currentPage]);
 
   const handleSearch = async () => {
     const trimmed = query.trim();
@@ -71,6 +83,31 @@ export function HomePage({ username, onLogout }: HomePageProps) {
       setError("An error occurred while deleting the user.");
     }
   }
+
+  const handlePageChange = async (p_number: string) => {
+    if (mode === "recommendations") {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        setPage(p_number.toString());
+        setCurrentPage(p_number.toString());
+        if(currentGenre) {
+          const data = await getRecommendationsForUserByGenre(username, currentGenre, parseInt(p_number));
+          setBooks(data);
+        }
+        else {
+          const data = await getRecommendationsForUser(username, parseInt(p_number));
+          setBooks(data);
+        }
+      } catch (e) {
+        console.error(e);
+        setError("The recommendations could not be loaded.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -122,9 +159,13 @@ export function HomePage({ username, onLogout }: HomePageProps) {
           onClick={async () => {
             setShowGenreFilter(false);
             try {
+              setCurrentGenre(null);
+              setLoading(true);
+              setError(null);
               const data = await getUserBooks(username);
               setBooks(data);
               setMode("my-books");
+              setLoading(false);
             } catch (e) {
               console.error(e);
               setError("The user's books could not be loaded.");
@@ -142,7 +183,12 @@ export function HomePage({ username, onLogout }: HomePageProps) {
               setLoading(true);
               setError(null);
               setMode("recommendations");
-              const data = await getRecommendationsForUser(username);
+              setCurrentGenre(null);
+              if(!currentPage)
+              {
+                setCurrentPage("1");
+              }
+              const data = await getRecommendationsForUser(username, parseInt(currentPage));
               setBooks(data);
             } catch (e) {
               console.error(e);
@@ -178,27 +224,49 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         >
           Filter
         </button>}
+        {mode === "recommendations" && <PageChanger
+          value={page}
+          onChange={setPage}
+          onSubmit={() => {
+              if (!page?.trim() || isNaN(parseInt(page))){}
+              else{
+                handlePageChange(page);
+              }
+            }}
+        />}
+        { mode === "recommendations" && !loading && !error &&
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-semibold">
+            Page : {currentPage}
+          </h2>
+        </div>}
         {showGenreFilter && (
           <div className="flex gap-2 mt-3 flex-wrap">
             {userGenres.map((genre) => (
               <button
-                key={genre}
-                onClick={() => {
-                  setLoading(true);
-                  getRecommendationsForUserByGenre(username, genre)
-                    .then(setBooks)
-                    .catch((e) => {
-                      console.error(e);
-                      setError("Failed to load recommendations for the selected genre.");
-                    })
-                    .finally(() => setLoading(false));
-                  setShowGenreFilter(false); // filtre seçilince kapansın
-                }}
-                className="text-xs px-3 py-1 rounded-full border 
-                border-blue-400 text-blue-600 hover:bg-blue-100 transition"
-              >
-                {genre}
-              </button>
+              key={genre}
+              onClick={() => {
+                setLoading(true);
+                setCurrentGenre(genre);
+
+                getRecommendationsForUserByGenre(username, genre, parseInt(currentPage))
+                  .then(setBooks)
+                  .catch((e) => {
+                    console.error(e);
+                    setError("Failed to load recommendations for the selected genre.");
+                  })
+                  .finally(() => setLoading(false));
+              }}
+              className={`text-xs px-3 py-1 rounded-full border transition
+                ${
+                  currentGenre === genre
+                    ? "bg-blue-600 text-black border-blue-600"
+                    : "border-blue-400 text-blue-600 hover:bg-blue-100"
+                }
+              `}
+            >
+              {genre}
+            </button>
             ))}
           </div>
         )}
