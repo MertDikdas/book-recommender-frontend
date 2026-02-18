@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Comment } from "../types/comment";
 import { getUserById } from "../api/users";
 import type { User } from "../types/user";
+import { getBookRating } from "../api/books";
 
 interface CommentCardProps {
   comment: Comment;
@@ -9,14 +10,18 @@ interface CommentCardProps {
 
 export function CommentCard({ comment }: CommentCardProps) {
   const [user, setUser] = useState<User | null>(null);
-
+  const [rating, setRating] = useState<number | null>(0);
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
       try {
         const data = await getUserById(comment.user_id);
-        if (!cancelled) setUser(data);
+        const tempRating = await getBookRating(data.username, comment.book_id);
+        if (!cancelled) {
+            setUser(data);
+            setRating(tempRating);
+        }
       } catch (e) {
         console.error("getUserById error:", e);
       }
@@ -36,6 +41,9 @@ export function CommentCard({ comment }: CommentCardProps) {
           {comment.comment_text}
         </p>
       </div>
+      <h3 className="font-semibold text-sm">{[1, 2, 3, 4, 5].map((star) => (
+        <span key={star} className={rating && star <= rating ? "text-yellow-400" : "text-gray-300"}>★</span>
+      ))}</h3>
     </div>
   );
 }
