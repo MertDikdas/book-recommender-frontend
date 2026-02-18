@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import type { Book } from "../types/book";
-import { rateBook, getBookRating, deleteUserBook } from "../api/books";
+import type { Comment } from "../types/comment";
+import { rateBook, getBookRating, deleteUserBook, getCommentsForBook } from "../api/books";
+import { CommentCard } from "../components/CommentCard";
 
 interface Props {
   book: Book;
@@ -16,6 +18,8 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
   const bookCoverUrl = book.img_cover_url ?? "/placeholder-cover.png";
   // Load user's existing rating for this book when component mounts or when username/book changes
   useEffect(() => {
@@ -87,6 +91,11 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
     }
   };  
 
+  const handleComments = async () => {
+    const data = await getCommentsForBook(book.id);
+    setComments(data);
+  };
+  
   return (
     <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
     <img
@@ -112,7 +121,11 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
         x
       </button>}
       {<button
-        onClick={() => handleDeleteBook()}
+        onClick={() => {setShowComments((prev) => !prev);
+          if(showComments){
+            handleComments();
+          }
+        }}
         className="absolute top-2 right-15 text-gray-400 hover:text-gray-600 transition-colors text-xl"
         title="Remove from list"
       >
@@ -158,6 +171,13 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
             <span className="text-xs text-green-600 font-medium">✓ Saved</span>
           )}
         </div>
+        {showComments && (
+          <div className="mt-3 border-t pt-3">
+            {comments.map((b) => (
+            <CommentCard comment={b}  />
+          ))}
+          </div>
+        )}
       </div>
     </div>
   );

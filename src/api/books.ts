@@ -1,5 +1,6 @@
 import { api } from "./client";
 import type { Book } from "../types/book";
+import type { Comment } from "../types/comment";
 
 //Recommendations
 export async function getRecommendationsForUser(username: string, page: number = 1): Promise<Book[]> {
@@ -57,6 +58,14 @@ export async function deleteUserBook(username: string, bookId: number): Promise<
 export async function getRecommendationsForUserByGenre(username: string, genre: string, page: number = 1): Promise<Book[]> {
   const res = await api.get(`/recommendations/${username}/${genre}`, {
     params: { page_number: page },
+  });
+  return res.data;
+}
+
+//Getting Book's all Comments
+export async function getCommentsForBook(book_id:number): Promise<Comment[]>{
+  const res = await api.get(`/books/comments`, {
+    params: { book_id: book_id},
   });
   return res.data;
 }
