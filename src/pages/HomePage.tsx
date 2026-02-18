@@ -78,11 +78,15 @@ export function HomePage({ username, onLogout }: HomePageProps) {
 
   const handleUserDelete = async () => {
     try {
+      setLoading(true);
+      setError(null);
       await deleteUser(username);
       onLogout();
     } catch (e) {
       console.error("USER DELETE ERROR:", e);
       setError("An error occurred while deleting the user.");
+    }finally {
+        setLoading(false);
     }
   }
 
@@ -91,7 +95,6 @@ export function HomePage({ username, onLogout }: HomePageProps) {
       try {
         setLoading(true);
         setError(null);
-        
         setPage(p_number.toString());
         setCurrentPage(p_number.toString());
         if(currentGenre) {
@@ -110,6 +113,75 @@ export function HomePage({ username, onLogout }: HomePageProps) {
       }
     }
   };
+  
+  const showMyBooks = async () =>{
+    setShowGenreFilter(false);
+    try {
+      setCurrentGenre(null);
+      setLoading(true);
+      setError(null);
+      const data = await getUserBooks(username);
+      setBooks(data);
+      setMode("my-books");
+    } catch (e) {
+      console.error(e);
+      setError("The user's books could not be loaded.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const showRecommendationsForUser = async() =>{
+    try {
+      setLoading(true);
+      setError(null);
+      setMode("recommendations");
+      setCurrentGenre(null);
+      if(!currentPage)
+      {
+        setCurrentPage("1");
+      }
+      const data = await getRecommendationsForUser(username, parseInt(currentPage));
+      setBooks(data);
+    } catch (e) {
+      console.error(e);
+      setError("The recommendations could not be loaded.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  const showFilters = async()=>{
+    try {
+      setLoading(true);
+      setError(null);
+      const genres = await getUserGenres(username);
+      setUserGenres(genres); 
+      if (!showGenreFilter) {
+        setShowGenreFilter(true);
+      } else {
+        setShowGenreFilter(false);
+      }
+    } catch (e) {
+      console.error(e);
+      setError("The user's genres could not be loaded.");
+    } finally{
+      setLoading(false);
+    }
+  }
+
+  const showRecommendationsForGenre = async(genre: string) => {
+    setLoading(true);
+    setCurrentGenre(genre);
+
+    getRecommendationsForUserByGenre(username, genre, parseInt(currentPage))
+      .then(setBooks)
+      .catch((e) => {
+        console.error(e);
+        setError("Failed to load recommendations for the selected genre.");
+      })
+      .finally(() => setLoading(false));
+  }
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -158,21 +230,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
         {loading && <p className="text-sm text-gray-500">Loading...</p>}
         {error && <p className="text-sm text-red-500">{error}</p>}
         <button
-          onClick={async () => {
-            setShowGenreFilter(false);
-            try {
-              setCurrentGenre(null);
-              setLoading(true);
-              setError(null);
-              const data = await getUserBooks(username);
-              setBooks(data);
-              setMode("my-books");
-              setLoading(false);
-            } catch (e) {
-              console.error(e);
-              setError("The user's books could not be loaded.");
-            }
-          }}
+          onClick={showMyBooks}
           className="text-sm px-3 py-1 rounded-lg border border-gray-300 
   hover:bg-gray-100 transition duration-200
   "
@@ -180,25 +238,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
           My Books
         </button>
         <button
-          onClick={async () => {
-            try {
-              setLoading(true);
-              setError(null);
-              setMode("recommendations");
-              setCurrentGenre(null);
-              if(!currentPage)
-              {
-                setCurrentPage("1");
-              }
-              const data = await getRecommendationsForUser(username, parseInt(currentPage));
-              setBooks(data);
-            } catch (e) {
-              console.error(e);
-              setError("The recommendations could not be loaded.");
-            } finally {
-              setLoading(false);
-            }
-          }}
+          onClick={showRecommendationsForUser}
           className="text-sm px-3 py-1 rounded-lg border border-gray-300 
   hover:bg-gray-100 transition duration-200
   "
@@ -206,20 +246,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
           Recommendations For Me
         </button>
         {mode === "recommendations" && <button 
-          onClick={async () => {
-          try {
-                const genres = await getUserGenres(username);
-                setUserGenres(genres); 
-                if (!showGenreFilter) {
-                  setShowGenreFilter(true);
-                } else {
-                  setShowGenreFilter(false);
-                }
-              } catch (e) {
-                console.error(e);
-                setError("The user's genres could not be loaded.");
-              }
-          }}
+          onClick={showFilters}
           className="text-sm px-3 py-1 rounded-lg border border-gray-300 
   hover:bg-gray-100 transition duration-200
   "
@@ -247,18 +274,7 @@ export function HomePage({ username, onLogout }: HomePageProps) {
             {userGenres.map((genre) => (
               <button
               key={genre}
-              onClick={() => {
-                setLoading(true);
-                setCurrentGenre(genre);
-
-                getRecommendationsForUserByGenre(username, genre, parseInt(currentPage))
-                  .then(setBooks)
-                  .catch((e) => {
-                    console.error(e);
-                    setError("Failed to load recommendations for the selected genre.");
-                  })
-                  .finally(() => setLoading(false));
-              }}
+              onClick={()=>showRecommendationsForGenre(genre)}
               className={`text-xs px-3 py-1 rounded-full border transition
                 ${
                   currentGenre === genre

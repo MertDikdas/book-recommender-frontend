@@ -111,6 +111,13 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
       >
         x
       </button>}
+      {<button
+        onClick={() => handleDeleteBook()}
+        className="absolute top-2 right-15 text-gray-400 hover:text-gray-600 transition-colors text-xl"
+        title="Remove from list"
+      >
+        Comments
+      </button>}
       <div className="flex-1">
         <h3 className="font-semibold text-sm">{book.title}</h3>
         <p className="text-xs text-gray-600">{book.author}</p>
