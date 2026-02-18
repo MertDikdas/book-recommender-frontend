@@ -22,8 +22,8 @@ export async function getUserGenres(username: string): Promise<string[]> {
 }
 
 export async function getUserById(user_id: number): Promise<User>{
-    const res = await api.get(`/users/by-id/`,{
-        params: { user_id: user_id},
+    const res = await api.get(`/users/by-id`,{
+        params: { user_id },
     });
     return res.data;
 }
