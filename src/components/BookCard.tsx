@@ -91,8 +91,6 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
     <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
     <img
       src={bookCoverUrl || "/placeholder-cover.png"}
-      alt={book.title}
-      onError={(e) => (e.currentTarget.src = "/placeholder-cover.png")}
       className="w-24 h-36 object-cover rounded"
     />
       {bookCardType === "other-book" && <button
