@@ -45,5 +45,6 @@ export function CommentCard({ comment }: CommentCardProps) {
         <span key={star} className={rating && star <= rating ? "text-yellow-400" : "text-gray-300"}>★</span>
       ))}</h3>
     </div>
+    
   );
 }

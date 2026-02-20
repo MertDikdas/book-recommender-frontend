@@ -69,3 +69,15 @@ export async function getCommentsForBook(book_id:number): Promise<Comment[]>{
   });
   return res.data;
 }
+export async function addComment(
+  username: string,
+  book_id: number,
+  comment_text: string
+) {
+  const res = await api.post("/books/comments", {
+    book_id,
+    username,
+    comment_text,
+  });
+  return res.data;
+}

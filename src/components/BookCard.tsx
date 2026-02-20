@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Book } from "../types/book";
 import type { Comment } from "../types/comment";
-import { rateBook, getBookRating, deleteUserBook, getCommentsForBook } from "../api/books";
+import { rateBook, getBookRating, deleteUserBook, getCommentsForBook , addComment} from "../api/books";
 import { CommentCard } from "../components/CommentCard";
 
 interface Props {
@@ -21,6 +21,7 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const bookCoverUrl = book.img_cover_url ?? "/placeholder-cover.png";
+  const [commentText, setCommentText] = useState("");
   // Load user's existing rating for this book when component mounts or when username/book changes
   useEffect(() => {
     const loadRating = async () => {
@@ -45,6 +46,21 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
     };
     loadRating();
   }, [username, book.id]);
+
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = commentText.trim();
+    if (!text) return;
+
+    try {
+      const newComment = await addComment(username, book.id, text);
+      setComments((prev) => [...prev, newComment]); // 👈 artık en alta
+      setCommentText("");
+    } catch (err) {
+      console.error("add comment error:", err);
+    }
+  };
 
   // Handle rating submission
   const handleRateBook = async (rate: number) => {
@@ -91,10 +107,6 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
     }
   };  
 
-  const handleComments = async () => {
-    const data = await getCommentsForBook(book.id);
-    setComments(data);
-  };
   
   return (
     <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
@@ -121,9 +133,12 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
         x
       </button>}
       {<button
-        onClick={() => {setShowComments((prev) => !prev);
-          if(showComments){
-            handleComments();
+        onClick={async () => {
+          const next = !showComments;
+          setShowComments(next);
+          if (next) {
+            const data = await getCommentsForBook(book.id);
+            setComments(data);
           }
         }}
         className="absolute top-2 right-15 text-gray-400 hover:text-gray-600 transition-colors text-xl"
@@ -145,7 +160,7 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
         
         {/* Rating Section */}
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-600">Rate:</span>
+          <span className="text-xs font-medium text-gray-600">My Rate:</span>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -173,11 +188,37 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
         </div>
         {showComments && (
           <div className="mt-3 border-t pt-3">
-            {comments.map((b) => (
-            <CommentCard comment={b}  />
-          ))}
+            <div className="flex flex-col gap-3">
+              {/* 1) Comment list */}
+              <div className="max-h-60 overflow-y-auto pr-2 space-y-2">
+                {comments.map((c) => (
+                  <CommentCard key={c.id} comment={c} />
+                ))}
+              </div>
+
+              {/* 2) Bottom input area */}
+              <form
+                onSubmit={handleSubmitComment}
+                className="flex items-center gap-2 pt-2 border-t"
+              >
+                <input
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="flex-1 border rounded-lg px-3 py-2 outline-none focus:ring"
+                />
+
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+                >
+                  Comment
+                </button>
+              </form>
+            </div>
           </div>
         )}
+
       </div>
     </div>
   );
