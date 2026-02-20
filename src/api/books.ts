@@ -81,3 +81,9 @@ export async function addComment(
   });
   return res.data;
 }
+
+export async function deleteComment(comment_id: number): Promise<void>{
+  await api.delete("/books/comments", {
+    params: { comment_id: comment_id },
+  });
+}

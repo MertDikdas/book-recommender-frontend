@@ -107,6 +107,10 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
     }
   };  
 
+  const handleCommentDeleted = async(comment_id:number) => { 
+    setComments((prevComments) => prevComments.filter((b) => b.id !== comment_id));
+  }
+
   
   return (
     <div className="border rounded-lg p-3 shadow-sm hover:shadow-md flex gap-3 bg-white relative">
@@ -192,7 +196,7 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
               {/* 1) Comment list */}
               <div className="max-h-60 overflow-y-auto pr-2 space-y-2">
                 {comments.map((c) => (
-                  <CommentCard key={c.id} comment={c} />
+                  <CommentCard key={c.id} comment={c} username={username} handleCommentDeleted={handleCommentDeleted} />
                 ))}
               </div>
 
