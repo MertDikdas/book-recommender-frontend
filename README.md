@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+**Book Recommender – Frontend**
+Frontend application of the Book Recommender System built with React, TypeScript and Vite.
+This application communicates with the FastAPI backend and allows users to browse books, rate them, and manage their personal book list.
+If you want to use this application in full verison, you should download **book-recommender-backend** also
+**Tech Stack**
+React
+TypeScript
+Vite
+TailwindCSS
+Axios / Fetch API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Installation**
+Clone repository
+git clone https://github.com/MertDikdas/book-recommender-frontend.git
+cd book-recommender-frontend
+**Install dependencies**
+npm install
+**Run development server**
+npm run dev
+**Application runs at:**
+http://localhost:5173
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Backend Requirement and Installation**
+Make sure the backend server is running at:
+http://127.0.0.1:8000
+**Clone repository**
+git clone https://github.com/MertDikdas/book-recommender-backend.git
+cd book-recommender-backend
+**Create virtual environment (optional but recommended)**
+python -m venv venv
+source venv/bin/activate  # Mac/Linux
+**Install dependencies**
+pip install -r requirements.txt
+**Pull books from open library**
+python -m src.database.create_db #Database creation
+python -m src.api.open_library_api.seed_from_api #Pull book from open lib. to database
+**Run the server**
+uvicorn src.api.api:app --reload
 
-## React Compiler
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+**If needed, update the API base URL inside:**
+src/api/
+**Build for Production**
+npm run build
+Build output will be generated in the dist/ folder.
+**Author**
+Mert Dikdaş
+Computer Engineering Student
+Ege University
