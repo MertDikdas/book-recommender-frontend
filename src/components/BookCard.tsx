@@ -64,32 +64,35 @@ export function BookCard({ book, username, onRatingSubmitted, onBookRemoved, boo
 
   // Handle rating submission
   const handleRateBook = async (rate: number) => {
-    setRating(rate);
-    // Only submit if user is logged in
-    if (username) {
-      try {
-        setIsSubmitting(true);
-        if (rating === rate) {
-          // If user clicks the same rating again, it means they want to remove their rating
-          await rateBook(username, book.id, 0); // Assuming 0 means "no rating"
-          setRating(null);
-          onRatingSubmitted?.();
-          return;
-        }
-        // Call API to save the rating for this book and user
-        await rateBook(username, book.id, rate);
-        // Show a temporary "Saved" message after successful submission
-        setSubmitted(true);
-        onRatingSubmitted?.();
-        // Reset after 2 seconds
-        setTimeout(() => {
-          setSubmitted(false);
-        }, 2000);
-      } catch (error) {
-        console.error("Error submitting rating:", error);
-      } finally {
-        setIsSubmitting(false);
-      }
+    if (!username || isSubmitting || isLoading) return;
+
+    // Eski değeri sakla (rollback için)
+    const prevRating = rating;
+
+    // Aynı yıldıza tıklandıysa → rating'i kaldır
+    const isSame = rating === rate;
+    const nextRating: number | null = isSame ? null : rate;
+
+    // UI'yı anında güncelle
+    setRating(nextRating);
+
+    try {
+      setIsSubmitting(true);
+
+      // Backend'e de yeni değeri gönder
+      // nextRating null ise 0 gönderiyoruz (senin "no rating" convention'un)
+      await rateBook(username, book.id, nextRating ?? 0);
+
+      // Başarılı mesajı
+      setSubmitted(true);
+      onRatingSubmitted?.();
+      setTimeout(() => setSubmitted(false), 2000);
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+      // Hata olursa UI'yı eski haline al
+      setRating(prevRating);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
