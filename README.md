@@ -10,6 +10,7 @@ TailwindCSS
 Axios / Fetch API
 
 ## Installation
+You have to use bash(if you are in Windows use git bash)
 ## Clone repository
 ```bash
 git clone https://github.com/MertDikdas/book-recommender-frontend.git
