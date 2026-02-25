@@ -3,11 +3,11 @@ Frontend application of the Book Recommender System built with React, TypeScript
 This application communicates with the FastAPI backend and allows users to browse books, rate them, and manage their personal book list.
 If you want to use this application in full verison, you should download **book-recommender-backend** also
 ## Tech Stack
-React
-TypeScript
-Vite
-TailwindCSS
-Axios / Fetch API
+- React
+- TypeScript
+- Vite
+- TailwindCSS
+- Axios / Fetch API
 
 ## Installation
 You have to use bash(if you are in Windows use git bash)
@@ -35,7 +35,7 @@ http://127.0.0.1:8000
 git clone https://github.com/MertDikdas/book-recommender-backend.git
 cd book-recommender-backend
 ```
-## Create virtual environment (optional but recommended)
+## Create virtual environment (optional but recommended)
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Mac/Linux
